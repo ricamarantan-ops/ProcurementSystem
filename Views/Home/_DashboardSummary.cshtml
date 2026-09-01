@@ -1,0 +1,91 @@
+﻿<!-- Top Metrics Row Grid (Stays empty/0 until data arrives) -->
+<section class="metrics-grid">
+    <div class="metric-card">
+        <span class="card-icon">📄</span>
+        <div class="card-info">
+            <span class="count">@ViewBag.PurchaseRequestsCount</span>
+            <span class="label">PURCHASE REQUESTS</span>
+        </div>
+    </div>
+    <div class="metric-card">
+        <span class="card-icon">⏳</span>
+        <div class="card-info">
+            <span class="count">@ViewBag.PendingApprovalsCount</span>
+            <span class="label">PENDING APPROVAL</span>
+        </div>
+    </div>
+    <div class="metric-card">
+        <span class="card-icon">📦</span>
+        <div class="card-info">
+            <span class="count">@ViewBag.OpenPurchaseOrdersCount</span>
+            <span class="label">ACTIVE POS</span>
+        </div>
+    </div>
+    <div class="metric-card highlight-card">
+        <span class="card-icon">₱</span>
+        <div class="card-info">
+            <span class="count">₱@ViewBag.TotalSpend.ToString("N0")</span>
+            <span class="label">TOTAL SPEND (P)</span>
+        </div>
+    </div>
+</section>
+
+<!-- Main Inner Workspace Grids Matching Your Layout Snippet -->
+<div class="content-split-grid">
+
+    <!-- Center: Main Performance Analytics Activity Area -->
+    <div class="data-panel chart-panel">
+        <h3>MONTHLY PROCUREMENT ACTIVITY</h3>
+        <div class="empty-chart-box">
+            <span class="placeholder-text">No activity recorded for this period.</span>
+        </div>
+    </div>
+
+    <!-- Right Column Panel Stack -->
+    <div class="side-stack">
+        <div class="data-panel lists-panel">
+            <h3>⚠️ PENDING APPROVALS</h3>
+            <div class="empty-list-placeholder">
+                @if (ViewBag.PendingList.Count == 0)
+                {
+                    <p class="no-data">No pending approvals found.</p>
+                }
+            </div>
+        </div>
+
+        <div class="data-panel lists-panel">
+            <h3>📂 OPEN PURCHASE ORDERS</h3>
+            <div class="empty-list-placeholder">
+                @if (ViewBag.OpenOrdersList.Count == 0)
+                {
+                    <p class="no-data">No open purchase orders.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Layout Row Panel Split Grid -->
+<div class="content-split-grid" style="margin-top: 20px;">
+
+    <div class="data-panel table-panel">
+        <h3>📋 RECENT TRANSACTIONS</h3>
+        <div class="empty-list-placeholder">
+            @if (ViewBag.RecentTransactionsList.Count == 0)
+            {
+                <p class="no-data">No recent transaction entries.</p>
+            }
+        </div>
+    </div>
+
+    <div class="data-panel table-panel">
+        <h3>⭐ TOP SUPPLIERS</h3>
+        <div class="empty-list-placeholder">
+            @if (ViewBag.TopSuppliersList.Count == 0)
+            {
+                <p class="no-data">No supplier history available yet.</p>
+            }
+        </div>
+    </div>
+
+</div>

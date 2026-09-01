@@ -1,0 +1,153 @@
+﻿@model List<ProcurementSystem.Models.Supplier>
+
+<div class="workspace-header">
+    <div class="header-left">
+        <h2>🏢 SUPPLIERS</h2>
+        <span class="system-date">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+    </div>
+    <div class="search-box-container">
+        <input type="text" placeholder="Search..." class="search-input" />
+        <button class="btn-search">🔍</button>
+    </div>
+</div>
+
+<!-- Operational Button Row & Top Right Summary Badge Card layout segment -->
+<div class="suppliers-controls-row">
+    <button class="btn-new-request" onclick="openSupplierModal()">+ ADD SUPPLIER</button>
+
+    <div class="supplier-badge-box">
+        <span class="badge-icon">🏬</span>
+        <div class="badge-data">
+            <span class="val">@ViewBag.ActiveSuppliersCount</span>
+            <span class="lbl">ACTIVE</span>
+        </div>
+    </div>
+</div>
+
+<!-- Master Spreadsheet Data Grid Container Matrix -->
+<div class="table-container">
+    <table class="pr-data-table font-matrix">
+        <thead>
+            <tr>
+                <th style="width: 12%;">SUPPLIER ID</th>
+                <th>COMPANY NAME</th>
+                <th>CONTACT PERSON</th>
+                <th>PHONE</th>
+                <th>EMAIL</th>
+                <th>CATEGORY</th>
+                <th style="text-align: center; width: 12%;">STATUS</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model == null || !Model.Any())
+            {
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #a39081; font-style: italic; padding: 40px;">
+                        No registered suppliers found. Click "+ ADD SUPPLIER" to expand your corporate database.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var s in Model)
+                {
+                    <tr>
+                        <td><strong>@s.SupplierID</strong></td>
+                        <td>@s.SupplierName</td>
+                        <td>@s.ContactPerson</td>
+                        <td>@s.Phone</td>
+                        <td>@s.Email</td>
+                        <td>@s.Category</td>
+                        <td style="text-align: center;">
+                            <span class="status-tag @s.Status.ToLower()">@s.Status.ToUpper()</span>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ================= NEW SUPPLIER DATA RECORD POPUP MODAL ================= -->
+<div id="supplierModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>🏢 Register New Supplier Merchant</h3>
+            <button class="close-modal-btn" onclick="closeSupplierModal()">×</button>
+        </div>
+        <form id="newSupplierForm" onsubmit="submitSupplierForm(event)">
+            <div class="modal-form-group">
+                <label>Company / Corporate Name:</label>
+                <input type="text" name="supplierName" placeholder="e.g., Weave & Craft Supplies Co." required />
+            </div>
+
+            <div class="modal-form-group">
+                <label>Contact Person:</label>
+                <input type="text" name="contactPerson" placeholder="Full Name" required />
+            </div>
+
+            <div class="modal-form-row">
+                <div class="modal-form-group">
+                    <label>Phone Number:</label>
+                    <input type="text" name="phone" placeholder="e.g., 09171234567" required />
+                </div>
+                <div class="modal-form-group">
+                    <label>Email Address:</label>
+                    <input type="email" name="email" placeholder="name@domain.com" required />
+                </div>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Physical Office Address:</label>
+                <input type="text" name="address" placeholder="City, Province" required />
+            </div>
+
+            <div class="modal-form-row">
+                <div class="modal-form-group">
+                    <label>Supply Category Classification:</label>
+                    <select name="category" required>
+                        <option value="Natural Materials">Natural Materials</option>
+                        <option value="Finishing Materials">Finishing Materials</option>
+                        <option value="Textile & Fabric">Textile & Fabric</option>
+                        <option value="Tools & Hardware">Tools & Hardware</option>
+                    </select>
+                </div>
+                <div class="modal-form-group">
+                    <label>Initial Lifecycle Status:</label>
+                    <select name="status" required>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeSupplierModal()">Discard</button>
+                <button type="submit" class="btn-submit-save">Save Supplier</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openSupplierModal() { document.getElementById('supplierModal').style.display = 'flex'; }
+    function closeSupplierModal() { document.getElementById('supplierModal').style.display = 'none'; document.getElementById('newSupplierForm').reset(); }
+
+    function submitSupplierForm(e) {
+        e.preventDefault();
+        const form = document.getElementById('newSupplierForm');
+        const formData = new FormData(form);
+
+        $.ajax({
+            url: '/Home/CreateSupplier',
+            type: 'POST',
+            data: new URLSearchParams(formData).toString(),
+            success: function(response) {
+                if (response.success) {
+                    closeSupplierModal();
+                    $("#workspace-content").load("/Home/GetSuppliers");
+                }
+            }
+        });
+    }
+</script>

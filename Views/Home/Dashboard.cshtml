@@ -1,0 +1,124 @@
+﻿@{
+    Layout = null;
+    string userRole = ViewBag.UserRole ?? "User";
+}
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LGCHA Procurement System - Dashboard</title>
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true">
+</head>
+<body>
+
+    <div class="dashboard-container">
+
+        <!-- ================= SIDEBAR NAVIGATION ================= -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-box">LGCHA</div>
+                <div class="logo-text">
+                    <h2>LAGUNA DE CAGAYAN</h2>
+                    <h3>HANDICRAFTS PROCUREMENT</h3>
+                </div>
+            </div>
+
+            <nav class="nav-tabs">
+                <a href="#" id="tab-dashboard" class="tab-item active">📊 Dashboard</a>
+                <a href="#" id="tab-pr" class="tab-item">📝 Purchase Requests</a>
+                <a href="#" id="tab-po" class="tab-item">📦 Purchase Orders</a>
+                <a href="#" id="tab-suppliers" class="tab-item">🏢 Suppliers</a>
+                <a href="#" id="tab-receiving" class="tab-item">🚚 Receiving</a>
+                <a href="#" id="tab-reports" class="tab-item">📈 Reports</a>
+
+                @if (userRole == "Admin")
+                {
+                    <a href="#" class="tab-item admin-only">⚙️ Settings (Admin)</a>
+                }
+            </nav>
+
+            <a asp-controller="Home" asp-action="Index" class="btn-logout">🚪 LOG OUT</a>
+        </aside>
+
+        <!-- ================= MAIN WORKSPACE AREA ================= -->
+        <main class="main-workspace">
+
+            <header class="top-bar">
+                <div class="page-title">💻 SYSTEM WORKSPACE</div>
+                <div class="current-date">@DateTime.Now.ToString("MMMM dd, yyyy")</div>
+                <div class="user-profile">👤 @userRole.ToUpper()</div>
+            </header>
+
+            <!-- This container dynamically houses whichever tab view fragment is clicked -->
+            <div id="workspace-content">
+                @await Html.PartialAsync("_DashboardSummary")
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Core Ajax Link Switcher Engine Scripts (Using Local jQuery to eliminate lags) -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+            $(document).ready(function() {
+
+                // 1. Load the empty/dynamic Dashboard Summary panel
+                $("#tab-dashboard").click(function(e) {
+                    e.preventDefault();
+                    $(".tab-item").removeClass("active");
+                    $(this).addClass("active");
+                    $("#workspace-content").load("/Home/GetDashboardSummary");
+                });
+
+                // 2. Load the full interactive Purchase Requests Data Grid
+                $("#tab-pr").click(function(e) {
+                    e.preventDefault();
+                    $(".tab-item").removeClass("active");
+                    $(this).addClass("active");
+                    $("#workspace-content").load("/Home/GetPurchaseRequests");
+                });
+
+                // 3. Load the completed Purchase Orders spreadsheet with dynamic dropdowns
+                $("#tab-po").click(function(e) {
+                    e.preventDefault();
+                    $(".tab-item").removeClass("active");
+                    $(this).addClass("active");
+                    $("#workspace-content").load("/Home/GetPurchaseOrders");
+                });
+
+                // 4. Load the Suppliers Registry registry layout data table
+                $("#tab-suppliers").click(function(e) {
+                    e.preventDefault();
+                    $(".tab-item").removeClass("active");
+                    $(this).addClass("active");
+                    $("#workspace-content").load("/Home/GetSuppliers");
+                });
+
+                // 5. Protected Administrative Link Trigger Rules
+                $(document).on("click", ".admin-only", function(e) {
+                    e.preventDefault();
+                    $(".tab-item").removeClass("active");
+                    $(this).addClass("active");
+                    $("#workspace-content").load("/Home/GetSettings");
+                });
+                // 6. Navigation routing event handler for Receiving tab panels
+                $("#tab-receiving").click(function(e) {
+                    e.preventDefault();
+                    $(".tab-item").removeClass("active");
+                    $(this).addClass("active");
+                    $("#workspace-content").load("/Home/GetReceiving");
+                });
+                // 7. Navigation routing event handler for execution of Reports dashboards
+                $("#tab-reports").click(function(e) {
+                    e.preventDefault();
+                    $(".tab-item").removeClass("active");
+                    $(this).addClass("active");
+                    $("#workspace-content").load("/Home/GetReports");
+                });
+            });
+    </script>
+</body>
+</html>

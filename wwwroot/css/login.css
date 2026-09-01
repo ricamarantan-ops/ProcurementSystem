@@ -1,0 +1,208 @@
+﻿:root {
+    --bg-gradient-start: #dfc3a7;
+    --bg-gradient-end: #b08d6d;
+    --card-dark-brown: #5c4028;
+    --input-bg: #4a331f;
+    --btn-light-tan: #e6ceb8;
+    --text-white: #ffffff;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Abstract Background Layout Elements */
+.background-container {
+    width: 100%;
+    max-width: 1200px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.circle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.circle-1 {
+    width: 300px;
+    height: 300px;
+    top: -50px;
+    left: -50px;
+}
+
+.circle-2 {
+    width: 180px;
+    height: 180px;
+    top: 120px;
+    left: 150px;
+}
+
+.circle-3 {
+    width: 120px;
+    height: 120px;
+    bottom: 200px;
+    left: 80px;
+}
+
+/* Header Typography */
+.system-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    z-index: 2;
+}
+
+    .system-header h1 {
+        font-size: 1.8rem;
+        color: #3d2612;
+        margin: 0;
+        letter-spacing: 2px;
+    }
+
+    .system-header h2 {
+        font-size: 1.1rem;
+        color: #533b25;
+        margin: 5px 0 0 0;
+        font-weight: 400;
+    }
+
+/* Main Login Window Interface */
+.login-card {
+    background-color: var(--card-dark-brown);
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem;
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    color: var(--text-white);
+    z-index: 2;
+    box-sizing: border-box;
+}
+
+    .login-card h3 {
+        text-align: center;
+        margin: 0;
+        font-size: 1.6rem;
+        letter-spacing: 1px;
+    }
+
+    .login-card .subtitle {
+        text-align: center;
+        font-size: 0.85rem;
+        color: var(--btn-light-tan);
+        margin-top: 5px;
+        margin-bottom: 2rem;
+    }
+
+/* User Form Interactions */
+.input-group {
+    margin-bottom: 1.25rem;
+}
+
+    .input-group label {
+        display: block;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+        color: var(--btn-light-tan);
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 0.8rem 1.2rem;
+        background-color: var(--input-bg);
+        border: none;
+        border-radius: 50px;
+        color: var(--text-white);
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: background-color 0.2s;
+    }
+
+        .input-group input:focus {
+            outline: 2px solid var(--btn-light-tan);
+            background-color: #3b2818;
+        }
+
+/* Options Bar Layout */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.btn-secondary {
+    background-color: var(--btn-light-tan);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    color: var(--card-dark-brown);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.forgot-link {
+    color: var(--btn-light-tan);
+    font-size: 0.85rem;
+    text-decoration: none;
+    border-bottom: 1px dashed transparent;
+}
+
+    .forgot-link:hover {
+        border-bottom: 1px dashed var(--btn-light-tan);
+    }
+
+/* Core Form Actions */
+.action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn-primary {
+    width: 60%;
+    background-color: #211206;
+    color: var(--text-white);
+    border: none;
+    padding: 0.8rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.1s;
+}
+
+    .btn-primary:hover {
+        transform: scale(1.03);
+    }
+
+.btn-register {
+    font-size: 0.9rem;
+    color: var(--btn-light-tan);
+    text-decoration: none;
+    margin-top: 0.5rem;
+}
+
+    .btn-register:hover {
+        text-decoration: underline;
+    }

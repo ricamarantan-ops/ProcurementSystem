@@ -1,0 +1,49 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handicraft Procurement System - Register</title>
+    <link rel="stylesheet" href="~/css/login.css">
+</head>
+<body>
+
+    <div class="background-container">
+        <header class="system-header">
+            <h1>HANDICRAFT PROCUREMENT SYSTEM</h1>
+            <h2>CREATE NEW ACCOUNT</h2>
+        </header>
+
+        <main class="login-card">
+            <h3>REGISTRATION</h3>
+            <p class="subtitle">Please provide your credentials below</p>
+
+            <form method="POST" asp-controller="Home" asp-action="ProcessRegister">
+                <div class="input-group">
+                    <label for="email">Email Address :</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="username">Choose Username :</label>
+                    <input type="text" id="username" name="username" placeholder="Enter username" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password :</label>
+                    <input type="password" id="password" name="password" placeholder="Create password" required>
+                </div>
+
+                <div class="action-group" style="margin-top: 2rem;">
+                    <button type="submit" class="btn-primary">REGISTER</button>
+                    <a asp-controller="Home" asp-action="Index" class="btn-register">Already have an account? Login</a>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>
+</html>

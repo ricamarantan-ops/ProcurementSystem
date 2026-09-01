@@ -1,0 +1,74 @@
+﻿@{
+    Layout = null; // Disables the default site template navigation bar to give you a clean screen
+}
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handicraft Procurement System - Login</title>
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true">
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+
+        <header class="system-header">
+            <h1>HANDICRAFT PROCUREMENT SYSTEM</h1>
+            <h2>LAGUNA DE CAGAYAN HANDICRAFTS ASSOCIATION</h2>
+        </header>
+
+        <main class="login-card">
+            <h3>LOGIN TO YOUR ACCOUNT</h3>
+            <p class="subtitle">Laguna de Cagayan Handicrafts Association</p>
+
+            <form method="POST" asp-controller="Home" asp-action="ProcessLogin">
+
+                <!-- Dynamic validation message display handler -->
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div style="color: #ffcccc; background-color: rgba(255,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-size: 0.9rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.1);">
+                        @ViewBag.ErrorMessage
+                    </div>
+                }
+
+                <div class="input-group">
+                    <label for="username">Username :</label>
+                    <input type="text" id="username" name="username" placeholder="Enter username" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password :</label>
+                    <input type="password" id="password" name="password" placeholder="Enter password" required>
+                </div>
+
+                <div class="form-options">
+                    <button type="button" class="btn-secondary" onclick="togglePasswordVisibility()">See Password 👁️</button>
+                    <a asp-controller="Home" asp-action="ForgotPassword" class="forgot-link">Forgot Password?</a>
+                </div>
+
+                <div class="action-group">
+                    <button type="submit" class="btn-primary">LOGIN</button>
+                    <a asp-controller="Home" asp-action="Register" class="btn-register">Create New Account</a>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+            function togglePasswordVisibility() {
+                const passwordInput = document.getElementById('password');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                } else {
+                    passwordInput.type = 'password';
+                }
+            }
+    </script>
+</body>
+</html>

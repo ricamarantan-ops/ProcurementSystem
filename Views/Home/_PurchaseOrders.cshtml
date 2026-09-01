@@ -1,0 +1,223 @@
+﻿@model ProcurementSystem.Models.PurchaseOrderViewModel
+
+<div class="workspace-header">
+    <div class="header-left">
+        <h2>📦 PURCHASE ORDERS</h2>
+        <span class="system-date">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+    </div>
+    <div class="search-box-container">
+        <input type="text" placeholder="Search..." class="search-input" />
+        <button class="btn-search">🔍</button>
+    </div>
+</div>
+
+<!-- High-Level Tracking Overview Counters Layer Rows matching snip visuals -->
+<section class="po-metrics-row">
+    <div class="po-summary-box">
+        <span class="box-icon">📋</span>
+        <div class="box-data"><span class="val">@ViewBag.TotalPOsCount</span><span class="lbl">TOTAL POS</span></div>
+    </div>
+    <div class="po-summary-box icon-blue">
+        <span class="box-icon">📤</span>
+        <div class="box-data"><span class="val">@ViewBag.SentCount</span><span class="lbl">SENT</span></div>
+    </div>
+    <div class="po-summary-box icon-orange">
+        <span class="box-icon">⏳</span>
+        <div class="box-data"><span class="val">@ViewBag.PartialCount</span><span class="lbl">PARTIAL</span></div>
+    </div>
+    <div class="po-summary-box icon-green">
+        <span class="box-icon">✅</span>
+        <div class="box-data"><span class="val">@ViewBag.ReceivedCount</span><span class="lbl">RECEIVED</span></div>
+    </div>
+    <button class="btn-create-po-circle" onclick="openPOModal()">
+        <span class="plus-icon">+</span><br /><span class="btn-lbl">CREATE PO</span>
+    </button>
+</section>
+
+<!-- Functional Operations Selection Tabs Bar Section -->
+<div class="controls-row" style="margin-top: 25px;">
+    <div class="filter-group">
+        <button class="btn-filter active" onclick="filterPO('ALL')">ALL</button>
+        <button class="btn-filter" onclick="filterPO('SENT')">SENT</button>
+        <button class="btn-filter" onclick="filterPO('PARTIAL')">PARTIAL</button>
+        <button class="btn-filter" onclick="filterPO('RECEIVED')">RECEIVED</button>
+    </div>
+</div>
+
+<!-- Master Spreadsheet Data Grid Container Matrix -->
+<div class="table-container">
+    <table class="pr-data-table">
+        <thead>
+            <tr>
+                <th>PO NO.</th>
+                <th>PR REF.</th>
+                <th>DATE</th>
+                <th>SUPPLIER</th>
+                <th>ITEM</th>
+                <th>QTY</th>
+                <th>UNIT COST (₱)</th>
+                <th>TOTAL (₱)</th>
+                <th>DELIVERY DATE</th>
+                <th>STATUS</th>
+            </tr>
+        </thead>
+        <tbody id="po-table-body">
+            @if (Model == null || Model.ExistingOrders == null || !Model.ExistingOrders.Any())
+            {
+                <tr>
+                    <td colspan="10" style="text-align: center; color: #a39081; font-style: italic; padding: 40px;">
+                        No official purchase orders found. Launch "+ CREATE PO" to execute vendor tracking records.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model.ExistingOrders)
+                {
+                    <tr class="po-row" data-status="@item.Status.ToUpper()">
+                        <td><strong>@item.PONumber</strong></td>
+                        <td>@item.PRReference</td>
+                        <td>@item.DateOrdered.ToString("MM/dd/yyyy")</td>
+                        <td>@item.SupplierName</td>
+                        <td>@item.ItemName</td>
+                        <td>@item.Quantity</td>
+                        <td>₱@item.UnitCost.ToString("N2")</td>
+                        <td><strong>₱@item.TotalAmount.ToString("N2")</strong></td>
+                        <td>@(item.DeliveryDate.HasValue ? item.DeliveryDate.Value.ToString("MM/dd/yyyy") : "PENDING")</td>
+                        <td><span class="status-tag @item.Status.ToLower()">@item.Status.ToUpper()</span></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ================= CREATE NEW PURCHASE ORDER INTERFACE MODAL ================= -->
+<div id="newPurchaseOrderModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>📦 Generate Official Purchase Order</h3>
+            <button class="close-modal-btn" onclick="closePOModal()">×</button>
+        </div>
+        <form id="newPOForm" onsubmit="submitPOForm(event)">
+            <div class="modal-form-row">
+                <!-- 🔗 Dynamic Approved PR Reference Dropdown Menu -->
+                <div class="modal-form-group">
+                    <label for="poFormPRRef">PR Reference Track:</label>
+                    <select name="prRef" id="poFormPRRef" onchange="autoPopulateItemName()" required>
+                        <option value="">-- Select Approved PR --</option>
+                        @if (Model != null && Model.ApprovedRequests != null)
+                        {
+                            foreach (var pr in Model.ApprovedRequests)
+                            {
+                                <option value="@pr.PRNumber" data-itemname="@pr.ItemName" data-qty="@pr.Quantity">
+                                    @pr.PRNumber (@pr.ItemName)
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- 🏢 Dynamic Supplier Registry Dropdown Menu -->
+                <div class="modal-form-group">
+                    <label for="poFormSupplier">Supplier Merchant:</label>
+                    <select name="supplier" id="poFormSupplier" required>
+                        <option value="">-- Select Vendor --</option>
+                        @if (Model != null && Model.RegisteredSuppliers != null)
+                        {
+                            foreach (var supplier in Model.RegisteredSuppliers)
+                            {
+                                <option value="@supplier.SupplierName">@supplier.SupplierName</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- 💡 Automated Helper: Automatically copies details down when a PR option is chosen -->
+            <div class="modal-form-group">
+                <label for="poFormItemName">Item Nomenclature:</label>
+                <input type="text" name="item" id="poFormItemName" placeholder="Will auto-populate..." required readonly style="background-color: #f3f3f3; color: #777; cursor: not-allowed;" />
+            </div>
+
+            <div class="modal-form-row">
+                <div class="modal-form-group">
+                    <label for="poFormQty">Quantity Count:</label>
+                    <input type="number" name="qty" id="poFormQty" min="1" required />
+                </div>
+                <div class="modal-form-group">
+                    <label for="poFormUnitCost">Unit Cost evaluation (₱):</label>
+                    <input type="number" step="0.01" name="unitCost" id="poFormUnitCost" placeholder="0.00" required />
+                </div>
+            </div>
+
+            <div class="modal-form-group">
+                <label for="poFormDeliveryDate">Expected Target Delivery Date:</label>
+                <input type="date" name="deliveryDate" id="poFormDeliveryDate" required />
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closePOModal()">Discard</button>
+                <button type="submit" class="btn-submit-save">Commit Order</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openPOModal() {
+        document.getElementById('newPurchaseOrderModal').style.display = 'flex';
+    }
+
+    function closePOModal() {
+        document.getElementById('newPurchaseOrderModal').style.display = 'none';
+        document.getElementById('newPOForm').reset();
+    }
+
+    function filterPO(status) {
+        // Handle visual tab selection states safely
+        event.target.parentElement.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        const rows = document.querySelectorAll('.po-row');
+        rows.forEach(row => {
+            if (status === 'ALL' || row.getAttribute('data-status') === status) { row.style.display = ''; }
+            else { row.style.display = 'none'; }
+        });
+    }
+
+    function autoPopulateItemName() {
+        var dropdown = document.getElementById("poFormPRRef");
+        var selectedOption = dropdown.options[dropdown.selectedIndex];
+
+        if (selectedOption.value !== "") {
+            var itemName = selectedOption.getAttribute("data-itemname");
+            var qty = selectedOption.getAttribute("data-qty");
+
+            document.getElementById("poFormItemName").value = itemName;
+            document.getElementById("poFormQty").value = qty;
+        } else {
+            document.getElementById("poFormItemName").value = "";
+            document.getElementById("poFormQty").value = "";
+        }
+    }
+
+    function submitPOForm(e) {
+        e.preventDefault();
+        const form = document.getElementById('newPOForm');
+        const formData = new FormData(form);
+        $.ajax({
+            url: '/Home/CreatePurchaseOrder',
+            type: 'POST',
+            data: new URLSearchParams(formData).toString(),
+            success: function(response) {
+                if (response.success) {
+                    closePOModal();
+                    $("#workspace-content").load("/Home/GetPurchaseOrders");
+                } else {
+                    alert("Error saving Purchase Order.");
+                }
+            }
+        });
+    }
+</script>

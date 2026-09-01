@@ -1,0 +1,12 @@
+﻿@model List<ProcurementSystem.Models.Supplier>
+<table class="pr-data-table font-matrix">
+    <thead>
+        <tr><th>SUPPLIER ID</th><th>COMPANY / CORPORATE NAME</th><th>CONTACT PERSON</th><th>PHONE NUMBER</th><th>EMAIL ADDRESS</th><th>STATUS</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var v in Model)
+        {
+            <tr><td><strong>@v.SupplierID</strong></td><td>@v.SupplierName</td><td>@v.ContactPerson</td><td>@v.Phone</td><td>@v.Email</td><td><span class="status-tag @v.Status.ToLower()">@v.Status.ToUpper()</span></td></tr>
+        }
+    </tbody>
+</table>

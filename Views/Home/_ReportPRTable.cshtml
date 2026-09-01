@@ -1,0 +1,12 @@
+﻿@model List<ProcurementSystem.Models.PurchaseRequest>
+<table class="pr-data-table font-matrix">
+    <thead>
+        <tr><th>PR NO.</th><th>DATE</th><th>ITEM</th><th>CATEGORY</th><th>QTY</th><th>UNIT</th><th>REQUESTED BY</th><th>PRIORITY</th><th>STATUS</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr><td><strong>@item.PRNumber</strong></td><td>@item.DateRequested.ToString("MM/dd/yyyy")</td><td>@item.ItemName</td><td>@item.Category</td><td>@item.Quantity</td><td>@item.Unit</td><td>@item.RequestedBy</td><td><span class="priority-tag @item.Priority?.ToLower()">@item.Priority?.ToUpper()</span></td><td><span class="status-tag @item.Status.ToLower()">@item.Status.ToUpper()</span></td></tr>
+        }
+    </tbody>
+</table>

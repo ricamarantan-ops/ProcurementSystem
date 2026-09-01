@@ -1,0 +1,202 @@
+﻿@model List<ProcurementSystem.Models.ReceivingLog>
+
+<div class="workspace-header">
+    <div class="header-left">
+        <h2>🚚 RECEIVING</h2>
+        <span class="system-date">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+    </div>
+    <div class="search-box-container">
+        <input type="text" placeholder="Search..." class="search-input" />
+        <button class="btn-search">🔍</button>
+    </div>
+</div>
+
+<!-- Score Indicator Summary Box Rows -->
+<section class="po-metrics-row">
+    <button class="btn-new-request" onclick="openReceivingModal()">+ RECORD DELIVERY</button>
+    
+    <div style="flex-grow: 1;"></div>
+
+    <div class="supplier-badge-box">
+        <span class="badge-icon">📦</span>
+        <div class="badge-data">
+            <span class="val">@ViewBag.TotalReceivedCount</span>
+            <span class="lbl">TOTAL RECEIVED</span>
+        </div>
+    </div>
+    <div class="supplier-badge-box">
+        <span class="badge-icon">📅</span>
+        <div class="badge-data">
+            <span class="val">@ViewBag.ThisMonthCount</span>
+            <span class="lbl">THIS MONTH</span>
+        </div>
+    </div>
+</section>
+
+<!-- Spreadsheet Data Grid Container Matrix -->
+<div class="table-container" style="margin-top: 20px;">
+    <table class="pr-data-table font-matrix">
+        <thead>
+            <tr>
+                <th>REC. NO.</th>
+                <th>DATE</th>
+                <th>PO REF.</th>
+                <th>ITEM</th>
+                <th>SUPPLIER</th>
+                <th>QTY ORDERED</th>
+                <th>QTY RECEIVED</th>
+                <th>UNIT</th>
+                <th>CONDITION</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model == null || !Model.Any())
+            {
+                <tr>
+                    <td colspan="9" style="text-align: center; color: #a39081; font-style: italic; padding: 40px;">
+                        No delivery entries logged yet. Launch "+ RECORD DELIVERY" to add items.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var log in Model)
+                {
+                    <tr>
+                        <td><strong>@log.ReceivingNo</strong></td>
+                        <td>@log.DateReceived.ToString("MM/dd/yyyy")</td>
+                        <td>@log.PORef</td>
+                        <td>@log.ItemName</td>
+                        <td>@log.Supplier</td>
+                        <td>@log.QtyOrdered</td>
+                        <td style="color: green; font-weight: bold;">@log.QtyReceived</td>
+                        <td>@log.Unit</td>
+                        <td>@log.Condition</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ================= RECORD DELIVERY INTERFACE OVERLAY MODAL ================= -->
+<div id="receivingModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>🚚 Record New Delivery Arrival</h3>
+            <button class="close-modal-btn" onclick="closeReceivingModal()">×</button>
+        </div>
+        <form id="newReceivingForm" onsubmit="submitReceivingForm(event)">
+            
+            <div class="modal-form-row">
+                <!-- 🔗 Dynamic PO Numbers Dropdown Menu Selector -->
+                <div class="modal-form-group">
+                    <label>PO Reference Track:</label>
+                    <select name="poRef" id="recFormPORef" onchange="autoPopulatePOData()" required>
+                        <option value="">-- Select Active PO --</option>
+                        @if (ViewBag.PurchaseOrdersList != null)
+                        {
+                            foreach (var po in (List<ProcurementSystem.Models.PurchaseOrder>)ViewBag.PurchaseOrdersList)
+                            {
+                                <option value="@po.PONumber" data-item="@po.ItemName" data-qty="@po.Quantity" data-supplier="@po.SupplierName">
+                                    @po.PONumber (@po.ItemName)
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- 🏢 Dynamic Active Suppliers Dropdown Menu Selector -->
+                <div class="modal-form-group">
+                    <label>Supplier Merchant:</label>
+                    <select name="supplier" id="recFormSupplier" required>
+                        <option value="">-- Select Registered Vendor --</option>
+                        @if (ViewBag.ActiveSuppliersList != null)
+                        {
+                            foreach (var s in (List<ProcurementSystem.Models.Supplier>)ViewBag.ActiveSuppliersList)
+                            {
+                                <option value="@s.SupplierName">@s.SupplierName</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Auto-populates from the selected PO -->
+            <div class="modal-form-group">
+                <label>Item Description Nomenclature:</label>
+                <input type="text" name="itemName" id="recFormItemName" placeholder="Will auto-populate..." required readonly style="background-color: #f3f3f3; color: #777;" />
+            </div>
+
+            <div class="modal-form-row">
+                <div class="modal-form-group">
+                    <label>Quantity Ordered:</label>
+                    <input type="number" name="qtyOrdered" id="recFormQtyOrdered" required readonly style="background-color: #f3f3f3; color: #777;" />
+                </div>
+                <div class="modal-form-group">
+                    <label>Quantity Arrived / Received:</label>
+                    <input type="number" name="qtyReceived" min="1" required />
+                </div>
+            </div>
+
+            <div class="modal-form-row">
+                <div class="modal-form-group">
+                    <label>Unit Metrics Layout:</label>
+                    <input type="text" name="unit" placeholder="e.g., Bundle, Yards" required />
+                </div>
+                <div class="modal-form-group">
+                    <label>Arrived Batch Condition:</label>
+                    <select name="condition" required>
+                        <option value="Good">Good</option>
+                        <option value="Incomplete">Incomplete</option>
+                        <option value="Damaged">Damaged</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeReceivingModal()">Discard</button>
+                <button type="submit" class="btn-submit-save">Log Entry</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openReceivingModal() { document.getElementById('receivingModal').style.display = 'flex'; }
+    function closeReceivingModal() { document.getElementById('receivingModal').style.display = 'none'; document.getElementById('newReceivingForm').reset(); }
+
+    // Auto-populates information straight from your selected Purchase Order option attributes
+    function autoPopulatePOData() {
+        var dropdown = document.getElementById("recFormPORef");
+        var option = dropdown.options[dropdown.selectedIndex];
+        
+        if (option.value !== "") {
+            document.getElementById("recFormItemName").value = option.getAttribute("data-item");
+            document.getElementById("recFormQtyOrdered").value = option.getAttribute("data-qty");
+            document.getElementById("recFormSupplier").value = option.getAttribute("data-supplier");
+        } else {
+            document.getElementById("recFormItemName").value = "";
+            document.getElementById("recFormQtyOrdered").value = "";
+            document.getElementById("recFormSupplier").value = "";
+        }
+    }
+
+    function submitReceivingForm(e) {
+        e.preventDefault();
+        const form = document.getElementById('newReceivingForm');
+        const formData = new FormData(form);
+
+        $.ajax({
+            url: '/Home/CreateReceivingEntry',
+            type: 'POST',
+            data: new URLSearchParams(formData).toString(),
+            success: function (response) {
+                if (response.success) {
+                    closeReceivingModal();
+                    $("#workspace-content").load("/Home/GetReceiving");
+                }
+            }
+        });
+    }
+</script>

@@ -1,0 +1,188 @@
+﻿@model List<ProcurementSystem.Models.PurchaseRequest>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    // Read the active session data properties from the server host instance
+    string userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole") ?? "User";
+}
+
+<div class="workspace-header">
+    <div class="header-left">
+        <h2>📝 PURCHASE REQUESTS</h2>
+        <span class="system-date">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+    </div>
+    <div class="search-box-container">
+        <input type="text" placeholder="Search..." class="search-input" />
+        <button class="btn-search">🔍</button>
+    </div>
+</div>
+
+<div class="controls-row">
+    <button class="btn-new-request" onclick="openPRModal()">+ NEW REQUEST</button>
+    <div class="filter-group">
+        <button class="btn-filter active" onclick="filterPR('ALL')">ALL</button>
+        <button class="btn-filter" onclick="filterPR('PENDING')">PENDING</button>
+        <button class="btn-filter" onclick="filterPR('APPROVED')">APPROVED</button>
+        <button class="btn-filter" onclick="filterPR('REJECTED')">REJECTED</button>
+    </div>
+</div>
+
+<div class="table-container">
+    <table class="pr-data-table">
+        <thead>
+            <tr>
+                <th>PR NO.</th>
+                <th>DATE</th>
+                <th>ITEM</th>
+                <th>CATEGORY</th>
+                <th>QTY</th>
+                <th>UNIT</th>
+                <th>REQUESTED BY</th>
+                <th>PRIORITY</th>
+                <th>STATUS</th>
+                @if (userRole == "Admin" || userRole == "Procurement Officer")
+                {
+                    <th style="text-align: center;">ACTIONS</th>
+                }
+            </tr>
+        </thead>
+        <tbody id="pr-table-body">
+            @if (Model == null || !Model.Any())
+            {
+                <tr>
+                    <td colspan="@(userRole == "Admin" ? 10 : 9)" style="text-align: center; color: #a39081; font-style: italic; padding: 30px;">
+                        No purchase requests recorded yet. Click "+ NEW REQUEST" to begin.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tr class="pr-row" data-status="@item.Status.ToUpper()">
+                        <td><strong>@item.PRNumber</strong></td>
+                        <td>@item.DateRequested.ToString("MM/dd/yyyy")</td>
+                        <td>@item.ItemName</td>
+                        <td>@item.Category</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Unit</td>
+                        <td>@item.RequestedBy</td>
+                        <td><span class="priority-tag @item.Priority?.ToLower()">@item.Priority?.ToUpper()</span></td>
+                        <td><span class="status-tag @item.Status.ToLower()">@item.Status.ToUpper()</span></td>
+
+                        <!-- 🛡️ Admin Actions Block Segment -->
+                        @if (userRole == "Admin")
+                        {
+                            <td style="text-align: center; white-space: nowrap;">
+                                @if (item.Status == "Pending")
+                                {
+                                    <button class="action-btn btn-approve" onclick="respondToRequest(@item.Id, 'Approved')">✔️ Approve</button>
+                                    <button class="action-btn btn-reject" onclick="respondToRequest(@item.Id, 'Rejected')">❌ Reject</button>
+                                }
+                                else
+                                {
+                                    <span style="font-size: 0.8rem; color: #a39081; font-style: italic;">Processed</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Creation Screen Container (Remains structurally identical) -->
+<div id="newRequestModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>📝 Create New Purchase Request</h3>
+            <button class="close-modal-btn" onclick="closePRModal()">×</button>
+        </div>
+        <form id="newPRForm" onsubmit="submitPRForm(event)">
+            <div class="modal-form-group">
+                <label>Item Name:</label>
+                <input type="text" name="itemName" placeholder="e.g., Bakong Leaves" required />
+            </div>
+            <div class="modal-form-group">
+                <label>Category:</label>
+                <select name="category" required>
+                    <option value="Natural Materials">Natural Materials</option>
+                    <option value="Textiles">Textiles</option>
+                    <option value="Finishing Materials">Finishing Materials</option>
+                </select>
+            </div>
+            <div class="modal-form-row">
+                <div class="modal-form-group">
+                    <label>Quantity:</label>
+                    <input type="number" name="quantity" min="1" value="1" required />
+                </div>
+                <div class="modal-form-group">
+                    <label>Unit:</label>
+                    <input type="text" name="unit" placeholder="Bundle" required />
+                </div>
+            </div>
+            <div class="modal-form-group">
+                <label>Priority Level:</label>
+                <div class="priority-radio-group">
+                    <label class="radio-label"><input type="radio" name="priority" value="Low" /> Low</label>
+                    <label class="radio-label"><input type="radio" name="priority" value="Medium" checked /> Medium</label>
+                    <label class="radio-label"><input type="radio" name="priority" value="High" /> High</label>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closePRModal()">Cancel</button>
+                <button type="submit" class="btn-submit-save">Submit Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openPRModal() { document.getElementById('newRequestModal').style.display = 'flex'; }
+    function closePRModal() { document.getElementById('newRequestModal').style.display = 'none'; document.getElementById('newPRForm').reset(); }
+
+    function filterPR(status) {
+        event.target.parentElement.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        const rows = document.querySelectorAll('.pr-row');
+        rows.forEach(row => {
+            if (status === 'ALL' || row.getAttribute('data-status') === status) { row.style.display = ''; }
+            else { row.style.display = 'none'; }
+        });
+    }
+
+    function submitPRForm(e) {
+        e.preventDefault();
+        const form = document.getElementById('newPRForm');
+        const formData = new FormData(form);
+        $.ajax({
+            url: '/Home/CreatePurchaseRequest',
+            type: 'POST',
+            data: new URLSearchParams(formData).toString(),
+            success: function(response) {
+                if (response.success) { closePRModal(); $("#workspace-content").load("/Home/GetPurchaseRequests"); }
+            }
+        });
+    }
+
+    // ⚡ AJAX Handler: Sends validation choices to the background SQL database instantly
+    function respondToRequest(id, determination) {
+        if (confirm("Are you sure you want to set this request status as " + determination + "?")) {
+            $.ajax({
+                url: '/Home/UpdateRequestStatus',
+                type: 'POST',
+                data: { requestId: id, newStatus: determination },
+                success: function(response) {
+                    if (response.success) {
+                        // Soft refreshes the spreadsheet body cleanly
+                        $("#workspace-content").load("/Home/GetPurchaseRequests");
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

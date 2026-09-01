@@ -1,0 +1,64 @@
+﻿@model List<ProcurementSystem.Models.PurchaseRequest>
+
+<div class="workspace-header">
+    <div class="header-left">
+        <h2>📊 REPORTS</h2>
+        <span class="system-date">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+    </div>
+</div>
+
+<!-- Dynamic Upper Circular Metrics Counters Panel Rows matching snip -->
+<section class="reports-badges-grid">
+    <div class="report-circle-card">
+        <span class="num">@ViewBag.TotalRequestsCount</span>
+        <span class="lbl">TOTAL REQUESTS</span>
+    </div>
+    <div class="report-circle-card">
+        <span class="num">@ViewBag.TotalOrdersCount</span>
+        <span class="lbl">TOTAL ORDERS</span>
+    </div>
+    <div class="report-circle-card highlight-circle">
+        <span class="num">₱@ViewBag.TotalSpendAmount.ToString("N0")</span>
+        <span class="lbl">TOTAL SPEND</span>
+    </div>
+    <div class="report-circle-card">
+        <span class="num">@ViewBag.ActiveSuppliersCount</span>
+        <span class="lbl">ACTIVE SUPPLIERS</span>
+    </div>
+</section>
+
+<!-- Document Controls Toolbelt Row -->
+<div class="reports-controls-bar">
+    <div class="filter-group">
+        <button class="btn-filter active" onclick="switchReport('PR', this)">📄 PR REPORT</button>
+        <button class="btn-filter" onclick="switchReport('PO', this)">📦 PO REPORT</button>
+        <button class="btn-filter" onclick="switchReport('SPEND', this)">₱ SPEND REPORT</button>
+        <button class="btn-filter" onclick="switchReport('SUPPLIER', this)">🏢 SUPPLIER REPORT</button>
+    </div>
+
+    <div class="utility-buttons-group">
+        <button class="btn-utility icon-btn" onclick="window.print()">🖨️ PRINT</button>
+        <select class="btn-utility select-export" onchange="alert('Exporting data as ' + this.value + '...')">
+            <option value="">Export 🔽</option>
+            <option value="Excel">Excel Spreadsheet</option>
+            <option value="PDF">PDF Document</option>
+        </select>
+    </div>
+</div>
+
+<!-- Active Document Content Display Canvas Grid Box -->
+<div class="table-container" id="report-table-canvas" style="margin-top: 20px;">
+    <!-- Injects the default PR Report table immediately on initial render execution -->
+    @await Html.PartialAsync("_ReportPRTable", Model)
+</div>
+
+<script>
+    function switchReport(reportType, buttonElement) {
+    // Toggle selected filter button class highlight loops
+    buttonElement.parentElement.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
+    buttonElement.classList.add('active');
+
+    // Execute quick soft load replacing spreadsheet canvas elements cleanly
+    $("#report-table-canvas").load("/Home/GetSpecificReport?reportType=" + reportType);
+    }
+</script>

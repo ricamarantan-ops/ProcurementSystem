@@ -1,0 +1,12 @@
+﻿@model List<ProcurementSystem.Models.PurchaseOrder>
+<table class="pr-data-table font-matrix">
+    <thead>
+        <tr><th>PO REFERENCE</th><th>DATE ISSUED</th><th>MERCHANT SUPPLIER</th><th>ITEM PROFILE</th><th>QTY</th><th>TOTAL SPEND BALANCE (₱)</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model)
+        {
+            <tr><td><strong>@s.PONumber</strong></td><td>@s.DateOrdered.ToString("MM/dd/yyyy")</td><td>@s.SupplierName</td><td>@s.ItemName</td><td>@s.Quantity</td><td style="color: #b08d6d; font-weight: bold;">₱@s.TotalAmount.ToString("N2")</td></tr>
+        }
+    </tbody>
+</table>

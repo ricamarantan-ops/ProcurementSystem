@@ -1,0 +1,249 @@
+﻿@model List<ProcurementSystem.Models.User>
+
+<div class="workspace-header">
+    <div class="header-left">
+        <h2>⚙️ SETTINGS</h2>
+        <span class="system-date">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+    </div>
+</div>
+
+<!-- Settings Interior Workspace Sub-Tabs Layout Segment matching snip -->
+<div class="settings-tabs-row">
+    <button class="settings-sub-tab active" onclick="switchSettingsSection('users', this)">👥 USERS</button>
+    <button class="settings-sub-tab" onclick="switchSettingsSection('categories', this)">🗂️ CATEGORIES</button>
+    <button class="settings-sub-tab" onclick="switchSettingsSection('info', this)">ℹ️ SYSTEM INFO</button>
+</div>
+
+<!-- ================= SECTION: USER MANAGEMENT WORKSPACE ================= -->
+<div id="settings-users-panel" class="settings-content-panel active-panel">
+    <div class="management-header">
+        <h3>👤 USER MANAGEMENT</h3>
+        <div class="search-box-container bg-white">
+            <input type="text" placeholder="Search..." class="search-input" />
+            <button class="btn-search">🔍</button>
+        </div>
+    </div>
+
+    <!-- Master Spreadsheet Data Grid Container Matrix -->
+    <div class="table-container">
+        <table class="pr-data-table text-center-columns">
+            <thead>
+                <tr>
+                    <th style="text-align: left;">FULL NAME</th>
+                    <th>USERNAME</th>
+                    <th>EMAIL</th>
+                    <th>ROLE</th>
+                    <th>STATUS</th>
+                    <th>EDIT</th>
+                    <th>DELETE</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td style="text-align: left;"><strong>@user.FullName</strong></td>
+                        <td>@user.Username</td>
+                        <td>@user.Email</td>
+                        <td>@user.Role</td>
+                        <td><span class="status-tag @user.Status.ToLower()">@user.Status.ToUpper()</span></td>
+                        <td><button class="icon-action-btn edit-color" onclick="openEditUserModal(@user.Id)">✏️</button></td>
+                        <td><button class="icon-action-btn delete-color" onclick="alert('Delete User Profile Coming Soon')">🗑️</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <button class="btn-new-request" style="margin-top: 20px;" onclick="openUserModal()">+ ADD USER</button>
+</div>
+
+<!-- ================= SECTION: CATEGORIES WORKSPACE (PLACEHOLDER) ================= -->
+<div id="settings-categories-panel" class="settings-content-panel">
+    <h3>🗂️ MATERIAL CATEGORY MANAGEMENT</h3>
+    <p style="color: #6b533e; font-style: italic;">Category configurations list coming soon.</p>
+</div>
+
+<!-- ================= SECTION: SYSTEM INFO WORKSPACE (PLACEHOLDER) ================= -->
+<div id="settings-info-panel" class="settings-content-panel">
+    <h3>ℹ️ SYSTEM INFORMATION</h3>
+    <p style="color: #6b533e; font-style: italic;">LGCHA System Platform build v1.0.26</p>
+</div>
+
+<!-- ================= ADMINISTRATIVE ADD USER OVERLAY MODAL ================= -->
+<div id="newUserModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>👥 Register New System Account</h3>
+            <button class="close-modal-btn" onclick="closeUserModal()">×</button>
+        </div>
+        <form id="newManagedUserForm" onsubmit="submitUserForm(event)">
+            <div class="modal-form-group">
+                <label>Full Employee Name:</label>
+                <input type="text" name="fullName" placeholder="e.g., Mae Reyes" required />
+            </div>
+            <div class="modal-form-group">
+                <label>System Username login Handle:</label>
+                <input type="text" name="username" placeholder="e.g., maereyes" required />
+            </div>
+            <div class="modal-form-group">
+                <label>Corporate Email address:</label>
+                <input type="email" name="email" placeholder="name@lgcha.ph" required />
+            </div>
+            <div class="modal-form-row">
+                <div class="modal-form-group">
+                    <label>Initial Assignment Password:</label>
+                    <input type="password" name="password" required />
+                </div>
+                <div class="modal-form-group">
+                    <label>Authorization Role Privileges:</label>
+                    <select name="role" required>
+                        <option value="Staff">Staff</option>
+                        <option value="Procurement Officer">Procurement Officer</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeUserModal()">Discard</button>
+                <button type="submit" class="btn-submit-save">Save Profile</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- ================= ADMINISTRATIVE EDIT USER OVERLAY MODAL ================= -->
+<div id="editUserModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>✏️ Edit System Account</h3>
+            <button class="close-modal-btn" onclick="closeEditUserModal()">×</button>
+        </div>
+        <form id="editUserForm" onsubmit="submitEditUserForm(event)">
+            <!-- Hidden field to keep track of the User Id -->
+            <input type="hidden" name="id" id="editUserId" />
+
+            <div class="modal-form-group">
+                <label>Full Employee Name:</label>
+                <input type="text" name="fullName" id="editFullName" required />
+            </div>
+            <div class="modal-form-group">
+                <label>Username (Read-Only):</label>
+                <input type="text" id="editUsername" readonly style="background-color: #f3f3f3; color: #777; cursor: not-allowed;" />
+            </div>
+            <div class="modal-form-group">
+                <label>Corporate Email address:</label>
+                <input type="email" name="email" id="editEmail" required />
+            </div>
+            <div class="modal-form-row">
+                <div class="modal-form-group">
+                    <label>New Password (Leave blank to keep current):</label>
+                    <input type="password" name="password" placeholder="••••••••" />
+                </div>
+                <div class="modal-form-group">
+                    <label>Authorization Role Privileges:</label>
+                    <select name="role" id="editRole" required>
+                        <option value="Staff">Staff</option>
+                        <option value="Procurement Officer">Procurement Officer</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-form-group">
+                <label>Account Status:</label>
+                <select name="status" id="editStatus" required>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeEditUserModal()">Discard</button>
+                <button type="submit" class="btn-submit-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openUserModal() { document.getElementById('newUserModal').style.display = 'flex'; }
+    function closeUserModal() { document.getElementById('newUserModal').style.display = 'none'; document.getElementById('newManagedUserForm').reset(); }
+
+    function switchSettingsSection(panelKey, tabElement) {
+        // Toggle Active highlight styles across subtabs
+        document.querySelectorAll('.settings-sub-tab').forEach(btn => btn.classList.remove('active'));
+        tabElement.classList.add('active');
+
+        // Toggle panel canvas displays
+        document.querySelectorAll('.settings-content-panel').forEach(panel => panel.classList.remove('active-panel'));
+        document.getElementById('settings-' + panelKey + '-panel').classList.add('active-panel');
+    }
+
+    function submitUserForm(e) {
+        e.preventDefault();
+        const form = document.getElementById('newManagedUserForm');
+        const formData = new FormData(form);
+
+        $.ajax({
+            url: '/Home/CreateManagedUser',
+            type: 'POST',
+            data: new URLSearchParams(formData).toString(),
+            success: function (response) {
+                if (response.success) {
+                    closeUserModal();
+                    $("#workspace-content").load("/Home/GetSettings");
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    }
+    function openEditUserModal(userId) {
+        // Fetch live user data from the database using AJAX GET
+        $.ajax({
+            url: '/Home/GetUserForEdit?id=' + userId,
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    // Pre-populate input fields with existing values
+                    document.getElementById('editUserId').value = response.id;
+                    document.getElementById('editFullName').value = response.fullName;
+                    document.getElementById('editUsername').value = response.username;
+                    document.getElementById('editEmail').value = response.email;
+                    document.getElementById('editRole').value = response.role;
+                    document.getElementById('editStatus').value = response.status;
+
+                    // Show modal overlay screen
+                    document.getElementById('editUserModal').style.display = 'flex';
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    }
+
+    function closeEditUserModal() {
+        document.getElementById('editUserModal').style.display = 'none';
+        document.getElementById('editUserForm').reset();
+    }
+
+    function submitEditUserForm(e) {
+        e.preventDefault();
+        const form = document.getElementById('editUserForm');
+        const formData = new FormData(form);
+
+        // Send updated user modifications to backend database via POST
+        $.ajax({
+            url: '/Home/UpdateManagedUser',
+            type: 'POST',
+            data: new URLSearchParams(formData).toString(),
+            success: function(response) {
+                if (response.success) {
+                    closeEditUserModal();
+                    // Dynamically reload table view content area cleanly
+                    $("#workspace-content").load("/Home/GetSettings");
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    }
+</script>
